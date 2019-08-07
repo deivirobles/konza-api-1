@@ -1,5 +1,4 @@
 const express = require('express');
-// Importamos el modulo de morgan
 const morgan = require('morgan');
 
 const logger = require('./config/logger');
@@ -7,12 +6,12 @@ const logger = require('./config/logger');
 const app = express();
 
 /*
- * Morgan es un middleware que va a imprimir
- * cada una de las peticiones que reciba
- * nuestra aplicación, el formato seleccionado
- * es 'combined'
+ * Redirigimos la salida de morgan que por
+ * defecto es la consola a logger, asi queda
+ * centralizada la gestion de los logs por un
+ * solo manejador
  */
-app.use(morgan('combined'));
+app.use(morgan('combined', { stream: { write: message => logger.info(message) } }));
 
 // Routes
 app.get('/', (req, res) => {
