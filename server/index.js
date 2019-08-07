@@ -2,6 +2,12 @@ const express = require('express');
 const requestId = require('express-request-id')();
 
 const logger = require('./config/logger');
+/*
+ * Actualizamos la ruta del enrutador pues
+ * esta definiendo la version del API con
+ * el directorio v1 creado
+ */
+const api = require('./api/v1');
 
 const app = express();
 
@@ -9,21 +15,24 @@ const app = express();
 app.use(requestId);
 app.use(logger.requests);
 
-// Routes
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Hello World!',
-  });
-});
+// Setup router and routes
+/*
+ * Es muy importante versionar el API para
+ * evitar futuros inconvenientes con las
+ * actualizaciones.
+ * Es muy facil añadir otro prefijo a nuestro
+ * enrutador ya que esa es la forma como el
+ * funciona, ahora tenemos dos prefijos
+ * independientes que esta enlazados al mismo
+ * enrutador, lo cual es una ventaja enorme
+ * al no tener que duplicar el codigo de todas
+ * las rutas que definamos en el API
+ */
+app.use('/api', api);
+app.use('/api/v1', api);
 
 // No route found handler
 app.use((req, res, next) => {
-  /*
-   * Ya que tenemos un middleware que maneja los
-   * errores delegamos el manejo de este error a
-   * el utilizando la función next y enviando
-   * como parametro toda la descripción del error
-   */
   next({
     message: 'Route not found',
     statusCode: 404,
@@ -33,16 +42,6 @@ app.use((req, res, next) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  /*
-   * Actualizamos nuestro middleware de error para
-   * que extraiga del objeto error el tipo de error
-   * de la llave level, como este es un log creado
-   * por el usuario y no una petición creamos el
-   * mensaje utilizando la función header que
-   * añadimos previamente en la variable log y esta
-   * vez invocamos el logger con el level respectivo
-   * y le pasamos como parametro el texto (log)
-   */
   const { message, statusCode = 500, level = 'error' } = err;
   const log = `${logger.header(req)} ${statusCode} ${message}`;
 
