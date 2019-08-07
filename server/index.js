@@ -2,8 +2,15 @@ const express = require('express');
 
 const app = express();
 
+/*
+ * Elegimos el formato JSON por defecto
+ * para darle respuesta a todas las peticiones
+ * del API
+ */
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.json({
+    message: 'Hello World!',
+  });
 });
 
 /*
