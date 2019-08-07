@@ -2,6 +2,7 @@ const express = require('express');
 const requestId = require('express-request-id')();
 
 const logger = require('./config/logger');
+const api = require('./api');
 
 const app = express();
 
@@ -9,19 +10,15 @@ const app = express();
 app.use(requestId);
 app.use(logger.requests);
 
-// Routes
+// Setup router and routes
 /*
- * Introducimos el metodo route que nos permite
- * organizar las rutas esta vez dividiendo la
- * ruta como parametro del metodo y añadidos por
- * punto todos los verbos HTTP con sus
- * respectivos callbacks en este caso solo get
+ * Utilizamos el metodo use para establecer
+ * un prefijo en las rutas de la aplicación
+ * en este caso /api y como segundo parametro
+ * un enrutador en este caso el definido en
+ * el archivo server/api/index.js
  */
-app.route('/api/tasks').get((req, res, next) => {
-  res.json({
-    message: 'GET all tasks',
-  });
-});
+app.use('/api', api);
 
 // No route found handler
 app.use((req, res, next) => {
