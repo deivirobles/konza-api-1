@@ -11,12 +11,13 @@ app.use(logger.requests);
 
 // Routes
 /*
- * Definimos nuestra primera ruta /api/tasks
- * que sera accedida con el verbo GET la cual
- * en el contrato REST corresponde al listado
- * del recurso tasks
+ * Introducimos el metodo route que nos permite
+ * organizar las rutas esta vez dividiendo la
+ * ruta como parametro del metodo y añadidos por
+ * punto todos los verbos HTTP con sus
+ * respectivos callbacks en este caso solo get
  */
-app.get('/api/tasks', (req, res, next) => {
+app.route('/api/tasks').get((req, res, next) => {
   res.json({
     message: 'GET all tasks',
   });
