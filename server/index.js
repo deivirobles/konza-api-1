@@ -25,4 +25,28 @@ app.use((req, res, next) => {
   });
 });
 
+/*
+ * Agregamos un middleware especial para el
+ * manejo de errores emitidos por nosotros en
+ * en el codigo fuente, este tiene una firma
+ * diferente ya que como primer parametro tiene
+ * el objeto error que como minimo tiene una
+ * llave llamada message.
+ * Extraemos las llaves necesarias y si no
+ * existen le asignamos los valores por defecto
+ * el codigo HTTP 500 corresponde a error interno
+ * del servidor e igual que el anterior
+ * middleware le damos respuesta al usuario
+ * mensaje en formato JSON y esto finaliza la
+ * peticion
+ */
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res.status(statusCode);
+  res.json({
+    message,
+  });
+});
+
 module.exports = app;
