@@ -1,30 +1,23 @@
-/*
- * Obtenemos directamente el metodo Router
- * y lo ejecutamos para instanciarlo en la
- * variable router
- */
-
 const router = require('express').Router();
-/*
- * Utilizamos el objeto Router de Express
- * para definir rutas independientemente
- * el prefijo que se les establezca en este
- * caso en el archivo de la aplicación de
- * express se definio que se añada el prefijo
- * /api a este enrutador, por lo tanto la
- * ruta que esta definida hasta el momento
- * sera: /api/tasks
- */
-router.route('/tasks').get((req, res, next) => {
-  res.json({
-    message: 'GET all tasks',
-  });
-});
+
+const tasks = require('./tasks/routes');
 
 /*
- * Convertimos este enrutador un modulo para
- * que pueda ser utilizado por cualquier otro
- * modulo dentro de la aplicación añadiendole
- * el prefijo que deseen
+ * Repetimos el mismo proceso que hicimos
+ * al definir el prefijo (/api) para todas
+ * las rutas de la aplicación, esta vez
+ * definimos el prefijo /tasks para las
+ * rutas que esten definidas en el enrutador
+ * del recurso tasks en el archivo de routes
+ * pero este a su vez tambien tiene el prefijo
+ * definido en el archivo principal por lo
+ * tanto las rutas se armar añadiendo todos
+ * los prefijos, ej: (/api)(/tasks)(/) donde
+ * los dos primeros grupos de parentesis son
+ * los prefijos añadidos con el metodo use y
+ * el ultimo esta definido en el enrutador
+ * del recurso tasks en routes
  */
+router.use('/tasks', tasks);
+
 module.exports = router;
