@@ -1,9 +1,18 @@
 const express = require('express');
+// Importamos el modulo de morgan
+const morgan = require('morgan');
 
-// Importamos el logger
 const logger = require('./config/logger');
 
 const app = express();
+
+/*
+ * Morgan es un middleware que va a imprimir
+ * cada una de las peticiones que reciba
+ * nuestra aplicación, el formato seleccionado
+ * es 'combined'
+ */
+app.use(morgan('combined'));
 
 // Routes
 app.get('/', (req, res) => {
@@ -17,10 +26,6 @@ app.use((req, res, next) => {
   const message = 'Route not found';
   const statusCode = 404;
 
-  /*
-   * Utilizamos el logger para guardar un
-   * mensaje de nivel advertencia
-   */
   logger.warn(message);
 
   res.status(statusCode);
@@ -33,10 +38,6 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
-  /*
-   * Utilizamos el logger para guardar un
-   * mensaje de nivel error
-   */
   logger.error(message);
 
   res.status(statusCode);
