@@ -1,9 +1,3 @@
-/*
- * Movemos morgan al archivo de logger
- * Requerimos el modulo que nos ayudara
- * a quitar el fin de linea que deja
- * por defecto morgan
- */
 const { createLogger, format, transports } = require('winston');
 const morgan = require('morgan');
 const stripFinalNewline = require('strip-final-newline');
@@ -14,30 +8,13 @@ const logger = createLogger({
   transports: [new transports.Console()],
 });
 
-/*
- * Creamos un nuevo token para morgan a partir
- * de la llave que creo request id en en el
- * objeto request, y asi poder incluirla en el
- * formato que generaremos de la peticion
- */
+// Create Morgan id token
 morgan.token('id', req => req.id);
 
-/*
- * Declaramos el nuevo formato que utilizará
- * morgan para imprimir las peticiones, esta
- * vez incluimos el id y cambiamos la fecha
- * en el formato ISO
- */
+// Setup request Format
 const requestFormat = ':remote-addr [:date[iso]] :id ":method :url" :status';
 
-/*
- * Creamos un nuevo objeto llamado requests
- * con el objetivo de instanciar morgan con
- * toda la configuracion del nuevo formato.
- * Adicionalmente en la función write que
- * redireccionamos a logger quitamos el fin
- * de linea de la salida
- */
+// Setup Request Logger with Morgan
 const requests = morgan(requestFormat, {
   stream: {
     write: (message) => {
@@ -48,14 +25,19 @@ const requests = morgan(requestFormat, {
   },
 });
 
-/*
- * Guardamos dentro del objeto logger una llave
- * con el mismo nombre del objeto que creamos
- * para morgan, esto con el objetivo de exportar
- * un solo objeto que se encargue de todo lo
- * relacionado con los logs, ya sean emitidos
- * por el usuario o peticiones entrantes
- */
+// Attach morgan to logger object
 logger.requests = requests;
+
+/*
+ * Creamos una nueva funcion que recibe como
+ * parametro el objeto req de la peticion y
+ * extrae los mismos token que especificamos
+ * en morgan para manejar el mismo encabezado
+ * en el logger
+ */
+logger.header = (req) => {
+  const date = new Date().toISOString();
+  return `${req.ip} [${date}] ${req.id} "${req.method} ${req.originalUrl}"`;
+};
 
 module.exports = logger;
