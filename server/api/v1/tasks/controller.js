@@ -1,24 +1,42 @@
 /*
- * Definimos y exportamos cada middleware
- * en este archivo para que sean
- * independientes de quien los utilice
+ * En cada uno de los middleware creamos las
+ * variables respectivas dependiendo de la
+ * informacion que esta establecida para esa
+ * ruta asociada (id) o enviada por el usuario
+ * (body) estas extraidas de la peticion y
+ * asinandoles un valor por defecto en el caso
+ * que no existan en el objeto req.
  */
 exports.create = (req, res, next) => {
-  res.json({});
+  const { body = {} } = req;
+  res.json(body);
 };
 
 exports.all = (req, res, next) => {
-  res.json({});
+  res.json([]);
 };
 
 exports.read = (req, res, next) => {
-  res.json({});
+  const { params = {} } = req;
+  const { id } = params;
+  res.json({
+    id,
+  });
 };
 
 exports.update = (req, res, next) => {
-  res.json({});
+  const { body = {}, params = {} } = req;
+  const { id } = params;
+  res.json({
+    id,
+    body,
+  });
 };
 
 exports.delete = (req, res, next) => {
-  res.json({});
+  const { params = {} } = req;
+  const { id } = params;
+  res.json({
+    id,
+  });
 };

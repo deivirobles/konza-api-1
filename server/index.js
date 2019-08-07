@@ -1,5 +1,6 @@
 const express = require('express');
 const requestId = require('express-request-id')();
+const bodyParser = require('body-parser');
 
 const logger = require('./config/logger');
 /*
@@ -15,19 +16,22 @@ const app = express();
 app.use(requestId);
 app.use(logger.requests);
 
-// Setup router and routes
 /*
- * Es muy importante versionar el API para
- * evitar futuros inconvenientes con las
- * actualizaciones.
- * Es muy facil añadir otro prefijo a nuestro
- * enrutador ya que esa es la forma como el
- * funciona, ahora tenemos dos prefijos
- * independientes que esta enlazados al mismo
- * enrutador, lo cual es una ventaja enorme
- * al no tener que duplicar el codigo de todas
- * las rutas que definamos en el API
+ * Utilizamos el modulo de body Parser para que
+ * procese los datos que son enviados por
+ * formualrios en la peticion u objetos JSON
+ * este creara un objeto llamado body donde cada
+ * llave corresponde al campo enviado con su
+ * respectivo valor, para el caso de JSON es un
+ * objeto literal de JavaScript
  */
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
+
+// Setup router and routes
 app.use('/api', api);
 app.use('/api/v1', api);
 
