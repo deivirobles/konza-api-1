@@ -10,20 +10,20 @@ app.use(requestId);
 app.use(logger.requests);
 
 // Routes
-app.get('/', (req, res) => {
+/*
+ * Definimos nuestra primera ruta /api/tasks
+ * que sera accedida con el verbo GET la cual
+ * en el contrato REST corresponde al listado
+ * del recurso tasks
+ */
+app.get('/api/tasks', (req, res, next) => {
   res.json({
-    message: 'Hello World!',
+    message: 'GET all tasks',
   });
 });
 
 // No route found handler
 app.use((req, res, next) => {
-  /*
-   * Ya que tenemos un middleware que maneja los
-   * errores delegamos el manejo de este error a
-   * el utilizando la función next y enviando
-   * como parametro toda la descripción del error
-   */
   next({
     message: 'Route not found',
     statusCode: 404,
@@ -33,16 +33,6 @@ app.use((req, res, next) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  /*
-   * Actualizamos nuestro middleware de error para
-   * que extraiga del objeto error el tipo de error
-   * de la llave level, como este es un log creado
-   * por el usuario y no una petición creamos el
-   * mensaje utilizando la función header que
-   * añadimos previamente en la variable log y esta
-   * vez invocamos el logger con el level respectivo
-   * y le pasamos como parametro el texto (log)
-   */
   const { message, statusCode = 500, level = 'error' } = err;
   const log = `${logger.header(req)} ${statusCode} ${message}`;
 
