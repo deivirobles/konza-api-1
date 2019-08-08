@@ -1,25 +1,10 @@
 const HTTP_STATUS_CODE = require('http-status-codes');
 
-// Importamos el modelo
 const Model = require('./model');
 
 exports.create = (req, res, next) => {
   const { body = {} } = req;
 
-  /*
-   * Utilizamos la función estatica del modelo
-   * create para crear un nuevo documento
-   * enviandole los campos que recibimos en el
-   * objeto body del request (req), una vez el
-   * documento es guardado en la base de datos
-   * se ejecuta el callback que fue declarada
-   * como segundo parametro, esta contiene el
-   * objeto error si hubo alguno durante la
-   * operacion y el documento que fue guardado
-   * en la base de datos con todos sus campos
-   * incluyendo los generados por la base de
-   * datos
-   */
   Model.create(body, (err, doc) => {
     if (err) {
       next(err);
@@ -35,16 +20,6 @@ exports.create = (req, res, next) => {
 };
 
 exports.all = (req, res, next) => {
-  /*
-   * Esta vez para consultar los campos utilizamos
-   * la funcion estatica find que acepta como
-   * parametros los criterios de busqueda pero
-   * esta retorno un obejto especial de Mongoose
-   * llamado Query que para ejecutarlo se debe
-   * llamar la función exec que recibe como
-   * parametro nuevamente el callback que se
-   * ejecutara una vez finalice la operacion
-   */
   Model.find().exec((err, docs) => {
     if (err) {
       next(err);
@@ -62,14 +37,34 @@ exports.read = (req, res, next) => {
   const { params = {} } = req;
   const { id } = params;
 
-  const doc = {
-    id,
-  };
+  /*
+   * Aqui hacemos algo muy parecido a lo que
+   * hicimos en el middleware all y es hacer
+   * un Query a la base de datos, lo unico
+   * diferente es que estamos utilizando una
+   * función especifica llamada findById,
+   * adicionalmente puede que la operacion
+   * sea exitosa, pero puede pasar que el
+   * documento no se encuentre por lo tanto
+   * debemos preguntar si el doc no es vacio
+   * para garantizar que si se encontro
+   */
 
-  res.json({
-    data: doc,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.OK,
+  Model.findById(id).exec((err, doc) => {
+    if (err) {
+      next(err);
+    } else if (doc) {
+      res.json({
+        data: doc,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+      });
+    } else {
+      next({
+        message: 'Resource not found',
+        statusCode: HTTP_STATUS_CODE.NOT_FOUND,
+      });
+    }
   });
 };
 
