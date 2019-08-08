@@ -1,20 +1,23 @@
-/*
- * Cargamos el modulo que se encarga de
- * leer por defecto el archivo .env y
- * crear cada una de las variables de
- * entorno especificadas
- */
 require('dotenv').config('');
 
 /*
- * Podemos acceder a todos las variables
- * de entorno mediante el objeto env del
- * objeto process disponible en cualquier
- * lugar de la aplicación
+ * Agregamos una nueva llave que contendra todos
+ * los valores asociados a la base de datos y
+ * estos a su vez los tomamos de las variables de
+ * entorno creadas desde el archivo .env
+ * Es muy importante proteger los datos sensibles
+ * que no queden guardados en el codigo fuente
  */
+
 const config = {
   server: {
     port: process.env.SERVER_PORT || 3000,
+  },
+  database: {
+    protocol: process.env.DATABASE_PROTOCOL,
+    url: process.env.DATABASE_URL,
+    username: process.env.DATABASE_USERNAME,
+    password: process.env.DATABASE_PASSWORD,
   },
 };
 
