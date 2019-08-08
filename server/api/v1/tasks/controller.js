@@ -1,39 +1,60 @@
-/*
- * Utilizamos la libreria http-status-codes para
- * establecer los codigos de respuesta por nombre
- * y no por numeros.
- * Estandarizamos la respuesta creando un llave
- * llamada data que contendra los datos que el
- * usuario require, pero tambien meta informacion
- * sobre el resultado de la operacion en la llave
- * success y aunque el codigo de la respuesta esta
- * en el mismo objeto de respuesta tambien la
- * adjuntamos como otra llave en el objeto de
- * respuesta
- */
-
 const HTTP_STATUS_CODE = require('http-status-codes');
+
+// Importamos el modelo
+const Model = require('./model');
 
 exports.create = (req, res, next) => {
   const { body = {} } = req;
 
-  const doc = body;
-
-  res.status(HTTP_STATUS_CODE.CREATED);
-  res.json({
-    data: doc,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.CREATED,
+  /*
+   * Utilizamos la función estatica del modelo
+   * create para crear un nuevo documento
+   * enviandole los campos que recibimos en el
+   * objeto body del request (req), una vez el
+   * documento es guardado en la base de datos
+   * se ejecuta el callback que fue declarada
+   * como segundo parametro, esta contiene el
+   * objeto error si hubo alguno durante la
+   * operacion y el documento que fue guardado
+   * en la base de datos con todos sus campos
+   * incluyendo los generados por la base de
+   * datos
+   */
+  Model.create(body, (err, doc) => {
+    if (err) {
+      next(err);
+    } else {
+      res.status(HTTP_STATUS_CODE.CREATED);
+      res.json({
+        data: doc,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.CREATED,
+      });
+    }
   });
 };
 
 exports.all = (req, res, next) => {
-  const docs = [];
-
-  res.json({
-    data: docs,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.OK,
+  /*
+   * Esta vez para consultar los campos utilizamos
+   * la funcion estatica find que acepta como
+   * parametros los criterios de busqueda pero
+   * esta retorno un obejto especial de Mongoose
+   * llamado Query que para ejecutarlo se debe
+   * llamar la función exec que recibe como
+   * parametro nuevamente el callback que se
+   * ejecutara una vez finalice la operacion
+   */
+  Model.find().exec((err, docs) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: docs,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+      });
+    }
   });
 };
 
