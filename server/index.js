@@ -31,15 +31,28 @@ app.use((req, res, next) => {
 });
 
 // Error handler
+/*
+ * Los Schemas de Mongoose crear un tipo de error
+ * especifico por lo tanto verificamos si es de
+ * tipo ValidationError si es asi actualizamos el
+ * codigo del status a 422
+ */
 app.use((err, req, res, next) => {
-  const { message, statusCode = HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, level = 'error' } = err;
+  const { message, level = 'error' } = err;
+  let { statusCode = HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR } = err;
   const log = `${logger.header(req)} ${statusCode} ${message}`;
+
+  if (err.name === 'ValidationError') {
+    statusCode = HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY;
+  }
 
   logger[level](log);
 
   res.status(statusCode);
   res.json({
+    error: true,
     message,
+    statusCode,
   });
 });
 

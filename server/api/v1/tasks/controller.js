@@ -1,49 +1,56 @@
-/*
- * Utilizamos la libreria http-status-codes para
- * establecer los codigos de respuesta por nombre
- * y no por numeros.
- * Estandarizamos la respuesta creando un llave
- * llamada data que contendra los datos que el
- * usuario require, pero tambien meta informacion
- * sobre el resultado de la operacion en la llave
- * success y aunque el codigo de la respuesta esta
- * en el mismo objeto de respuesta tambien la
- * adjuntamos como otra llave en el objeto de
- * respuesta
- */
-
 const HTTP_STATUS_CODE = require('http-status-codes');
+
+const Model = require('./model');
+
+exports.id = (req, res, next, id) => {
+  Model.findById(id).exec((err, doc) => {
+    if (err) {
+      next(err);
+    } else if (doc) {
+      req.doc = doc;
+      next();
+    } else {
+      next({
+        message: 'Resource not found',
+        statusCode: HTTP_STATUS_CODE.NOT_FOUND,
+      });
+    }
+  });
+};
 
 exports.create = (req, res, next) => {
   const { body = {} } = req;
 
-  const doc = body;
-
-  res.status(HTTP_STATUS_CODE.CREATED);
-  res.json({
-    data: doc,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.CREATED,
+  Model.create(body, (err, doc) => {
+    if (err) {
+      next(err);
+    } else {
+      res.status(HTTP_STATUS_CODE.CREATED);
+      res.json({
+        data: doc,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.CREATED,
+      });
+    }
   });
 };
 
 exports.all = (req, res, next) => {
-  const docs = [];
-
-  res.json({
-    data: docs,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.OK,
+  Model.find().exec((err, docs) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: docs,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+      });
+    }
   });
 };
 
 exports.read = (req, res, next) => {
-  const { params = {} } = req;
-  const { id } = params;
-
-  const doc = {
-    id,
-  };
+  const { doc } = req;
 
   res.json({
     data: doc,
@@ -52,33 +59,48 @@ exports.read = (req, res, next) => {
   });
 };
 
+/*
+ * Para actualizar el documento utilizamos el
+ * metodo save del mismo documento no el Model
+ * como tal, adicionalmente sobreescribimos las
+ * llaves que envia el usuario en el body con
+ * el metodo Object.assign
+ */
 exports.update = (req, res, next) => {
-  const { body = {}, params = {} } = req;
-  const { id } = params;
+  const { body = {}, doc } = req;
 
-  const doc = {
-    ...body,
-    id,
-  };
+  Object.assign(doc, body);
 
-  res.json({
-    data: doc,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.OK,
+  doc.save((err, updated) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: updated,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+      });
+    }
   });
 };
 
+/*
+ * El codigo es muy similiar a lo realizado anteriormente
+ * la principal diferencia esta en el nombre del metodo
+ * el cual es remove
+ */
 exports.delete = (req, res, next) => {
-  const { params = {} } = req;
-  const { id } = params;
+  const { doc } = req;
 
-  const doc = {
-    id,
-  };
-
-  res.json({
-    data: doc,
-    success: true,
-    statusCode: HTTP_STATUS_CODE.OK,
+  doc.remove((err, deleted) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: deleted,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+      });
+    }
   });
 };
