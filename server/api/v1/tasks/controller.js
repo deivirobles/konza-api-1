@@ -2,11 +2,10 @@ const HTTP_STATUS_CODE = require('http-status-codes');
 
 const Model = require('./model');
 
-exports.id = (req, res, next, id) => {
-  Model.findById(id).exec((err, doc) => {
-    if (err) {
-      next(err);
-    } else if (doc) {
+exports.id = async (req, res, next, id) => {
+  try {
+    const doc = await Model.findById(id).exec();
+    if (doc) {
       req.doc = doc;
       next();
     } else {
@@ -15,38 +14,40 @@ exports.id = (req, res, next, id) => {
         statusCode: HTTP_STATUS_CODE.NOT_FOUND,
       });
     }
-  });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
   const { body = {} } = req;
 
-  Model.create(body, (err, doc) => {
-    if (err) {
-      next(err);
-    } else {
-      res.status(HTTP_STATUS_CODE.CREATED);
-      res.json({
-        data: doc,
-        success: true,
-        statusCode: HTTP_STATUS_CODE.CREATED,
-      });
-    }
-  });
+  try {
+    const doc = await Model.create(body);
+
+    res.status(HTTP_STATUS_CODE.CREATED);
+    res.json({
+      data: doc,
+      success: true,
+      statusCode: HTTP_STATUS_CODE.CREATED,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.all = (req, res, next) => {
-  Model.find().exec((err, docs) => {
-    if (err) {
-      next(err);
-    } else {
-      res.json({
-        data: docs,
-        success: true,
-        statusCode: HTTP_STATUS_CODE.OK,
-      });
-    }
-  });
+exports.all = async (req, res, next) => {
+  try {
+    const docs = await Model.find().exec();
+
+    res.json({
+      data: docs,
+      success: true,
+      statusCode: HTTP_STATUS_CODE.OK,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.read = (req, res, next) => {
@@ -59,48 +60,34 @@ exports.read = (req, res, next) => {
   });
 };
 
-/*
- * Para actualizar el documento utilizamos el
- * metodo save del mismo documento no el Model
- * como tal, adicionalmente sobreescribimos las
- * llaves que envia el usuario en el body con
- * el metodo Object.assign
- */
-exports.update = (req, res, next) => {
-  const { body = {}, doc } = req;
+exports.update = async (req, res, next) => {
+  try {
+    const { body = {}, doc } = req;
 
-  Object.assign(doc, body);
+    Object.assign(doc, body);
+    const updated = await doc.save();
 
-  doc.save((err, updated) => {
-    if (err) {
-      next(err);
-    } else {
-      res.json({
-        data: updated,
-        success: true,
-        statusCode: HTTP_STATUS_CODE.OK,
-      });
-    }
-  });
+    res.json({
+      data: updated,
+      success: true,
+      statusCode: HTTP_STATUS_CODE.OK,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-/*
- * El codigo es muy similiar a lo realizado anteriormente
- * la principal diferencia esta en el nombre del metodo
- * el cual es remove
- */
-exports.delete = (req, res, next) => {
-  const { doc } = req;
+exports.delete = async (req, res, next) => {
+  try {
+    const { doc } = req;
 
-  doc.remove((err, deleted) => {
-    if (err) {
-      next(err);
-    } else {
-      res.json({
-        data: deleted,
-        success: true,
-        statusCode: HTTP_STATUS_CODE.OK,
-      });
-    }
-  });
+    const deleted = await doc.remove();
+    res.json({
+      data: deleted,
+      success: true,
+      statusCode: HTTP_STATUS_CODE.OK,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
