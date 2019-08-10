@@ -25,7 +25,13 @@ const sortParseParams = (
   };
 };
 
+const sortCompactToStr = (sortBy, direction) => {
+  const dir = direction === 'desc' ? '-' : '';
+  return `${dir}${sortBy}`;
+};
+
 module.exports = {
   paginationParseParams,
   sortParseParams,
+  sortCompactToStr,
 };
