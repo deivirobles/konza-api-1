@@ -1,15 +1,8 @@
 const mongoose = require('mongoose');
 
-const { Schema } = mongoose;
-
-/*
- * El Schema de mongoose nos brinda muchas
- * funcionalidades como establecer una validacion
- * basica para el modelo, asi como funciones de
- * quitar los espacios de sobra en los valores de
- * los campos y demas, inclusive colocar un valor
- * por defecto.
- */
+const {
+  Schema,
+} = mongoose;
 
 const fields = {
   title: {
@@ -35,18 +28,45 @@ const fields = {
 };
 
 /*
- * El Schema tambien permite establecer ciertas
- * opciones una de ellas son los timestamps para
- * que se creen los campos createdAt y updatedAt
- * de tipo fecha cada vez que se cree o actualice
- * un registro respectivamente
+ * Creamos un nuevo objeto con todos los campos
+ * que seran referencias en este modelo, con el
+ * objetivo de acceder a ellas posteriormente
+ * para poder obtener sus datos correspondientes
  */
 
-const task = new Schema(fields, {
+const references = {
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: true,
+  },
+  projectId: {
+    type: Schema.Types.ObjectId,
+    ref: 'project',
+  },
+};
+
+/*
+ * Utilizamos Object Spread Operator para
+ * fusionar los fields y los references
+ * en un solo Objeto que finalmente es lo
+ * que recibira Schema
+ */
+
+const task = new Schema({
+  ...fields,
+  ...references,
+}, {
   timestamps: true,
 });
+
+/*
+ * Finalmente exportamos el nuevo objeto
+ * para poder referenciarlo en el controlador
+ */
 
 module.exports = {
   Model: mongoose.model('task', task),
   fields,
+  references,
 };
