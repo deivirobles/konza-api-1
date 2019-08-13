@@ -12,6 +12,9 @@ const {
   sortParseParams,
   sortCompactToStr,
 } = require('./../../../utils');
+const {
+  filterByNested,
+} = require('./../../../utils');
 
 /*
  * Obtenemos un Array con los nombres de las llaves
@@ -44,11 +47,14 @@ exports.id = async (req, res, next, id) => {
 
 exports.create = async (req, res, next) => {
   const {
-    body = {},
+    body = {}, params = {},
   } = req;
 
   try {
-    const doc = await Model.create(body);
+    const doc = await Model.create({
+      ...body,
+      ...params,
+    });
 
     res.status(HTTP_STATUS_CODE.CREATED);
     res.json({
@@ -63,7 +69,7 @@ exports.create = async (req, res, next) => {
 
 exports.all = async (req, res, next) => {
   const {
-    query = {},
+    query = {}, params = {},
   } = req;
   const {
     limit,
@@ -75,10 +81,13 @@ exports.all = async (req, res, next) => {
     direction,
   } = sortParseParams(query, fields);
   const sort = sortCompactToStr(sortBy, direction);
-  const populate = referencesNames.join(' ');
+  const {
+    filters,
+    populate,
+  } = filterByNested(params, referencesNames);
 
   try {
-    const all = Model.find()
+    const all = Model.find(filters)
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -121,10 +130,10 @@ exports.read = (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const {
-      body = {}, doc,
+      body = {}, doc, params = {},
     } = req;
 
-    Object.assign(doc, body);
+    Object.assign(doc, body, params);
     const updated = await doc.save();
 
     res.json({

@@ -1,4 +1,7 @@
-const { pagination, sort } = require('./../config');
+const {
+  pagination,
+  sort
+} = require('./../config');
 
 const paginationParseParams = ({
   limit = pagination.limit,
@@ -10,8 +13,10 @@ const paginationParseParams = ({
   skip: skip ? parseInt(skip, 10) : (page - 1) * limit,
 });
 
-const sortParseParams = (
-  { sortBy = sort.sortBy.default, direction = sort.direction.default },
+const sortParseParams = ({
+    sortBy = sort.sortBy.default,
+    direction = sort.direction.default
+  },
   fields,
 ) => {
   const whitelist = {
@@ -30,8 +35,25 @@ const sortCompactToStr = (sortBy, direction) => {
   return `${dir}${sortBy}`;
 };
 
+// params = { userId: 'assafasfafs' }
+// paramsNames = ['userId']
+// referencesNames ['userId', 'projectId']
+
+// filters: { userId: 'assafasfafs' }
+// populate: ['projectId']
+
+const filterByNested = (params, referencesNames) => {
+  const paramsNames = Object.getOwnPropertyNames(params);
+  const populateNames = referencesNames.filter(item => !paramsNames.includes(item));
+  return {
+    filters: params,
+    populate: populateNames.join(' '),
+  };
+};
+
 module.exports = {
   paginationParseParams,
   sortParseParams,
   sortCompactToStr,
+  filterByNested,
 };
