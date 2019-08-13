@@ -1,6 +1,8 @@
 const HTTP_STATUS_CODE = require('http-status-codes');
 
-const { Model, fields, references } = require('./model');
+const {
+  Model, fields, references, virtuals,
+} = require('./model');
 const { paginationParseParams } = require('./../../../utils');
 const { sortParseParams, sortCompactToStr } = require('./../../../utils');
 const { filterByNested } = require('./../../../utils');
@@ -9,7 +11,10 @@ const { filterByNested } = require('./../../../utils');
  * Obtenemos un Array con los nombres de las llaves
  * de las referencias
  */
-const referencesNames = Object.getOwnPropertyNames(references);
+const referencesNames = [
+  ...Object.getOwnPropertyNames(references),
+  ...Object.getOwnPropertyNames(virtuals),
+];
 
 exports.id = async (req, res, next, id) => {
   try {
