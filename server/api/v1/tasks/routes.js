@@ -1,6 +1,7 @@
 const router = require('express').Router({
   mergeParams: true,
 });
+
 const controller = require('./controller');
 /*
  * /api/tasks/ POST - CREATE

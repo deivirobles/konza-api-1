@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
-const {
-  Schema,
-} = mongoose;
+const { Schema } = mongoose;
 
 const fields = {
   title: {
@@ -53,12 +51,15 @@ const references = {
  * que recibira Schema
  */
 
-const task = new Schema({
-  ...fields,
-  ...references,
-}, {
-  timestamps: true,
-});
+const task = new Schema(
+  {
+    ...fields,
+    ...references,
+  },
+  {
+    timestamps: true,
+  },
+);
 
 /*
  * Finalmente exportamos el nuevo objeto
