@@ -1,12 +1,24 @@
 const HTTP_STATUS_CODE = require('http-status-codes');
 
-const { Model, fields } = require('./model');
-const { paginationParseParams } = require('./../../../utils');
-const { sortParseParams, sortCompactToStr } = require('./../../../utils');
+const {
+  Model,
+  fields,
+  references,
+} = require('./model');
+const {
+  paginationParseParams,
+} = require('./../../../utils');
+const {
+  sortParseParams,
+  sortCompactToStr,
+} = require('./../../../utils');
+
+const referencesNames = Object.getOwnPropertyNames(references);
 
 exports.id = async (req, res, next, id) => {
   try {
-    const doc = await Model.findById(id).exec();
+    const populate = referencesNames.join(' ');
+    const doc = await Model.findById(id).populate(populate).exec();
     if (doc) {
       req.doc = doc;
       next();
@@ -22,7 +34,9 @@ exports.id = async (req, res, next, id) => {
 };
 
 exports.create = async (req, res, next) => {
-  const { body = {} } = req;
+  const {
+    body = {},
+  } = req;
 
   try {
     const doc = await Model.create(body);
@@ -39,16 +53,27 @@ exports.create = async (req, res, next) => {
 };
 
 exports.all = async (req, res, next) => {
-  const { query = {} } = req;
-  const { limit, page, skip } = paginationParseParams(query);
-  const { sortBy, direction } = sortParseParams(query, fields);
+  const {
+    query = {},
+  } = req;
+  const {
+    limit,
+    page,
+    skip,
+  } = paginationParseParams(query);
+  const {
+    sortBy,
+    direction,
+  } = sortParseParams(query, fields);
   const sort = sortCompactToStr(sortBy, direction);
+  const populate = referencesNames.join(' ');
 
   try {
     const all = Model.find()
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .populate(populate)
       .exec();
     const count = Model.countDocuments();
 
@@ -73,7 +98,9 @@ exports.all = async (req, res, next) => {
 };
 
 exports.read = (req, res, next) => {
-  const { doc } = req;
+  const {
+    doc,
+  } = req;
 
   res.json({
     data: doc,
@@ -84,7 +111,9 @@ exports.read = (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const { body = {}, doc } = req;
+    const {
+      body = {}, doc,
+    } = req;
 
     Object.assign(doc, body);
     const updated = await doc.save();
@@ -101,7 +130,9 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   try {
-    const { doc } = req;
+    const {
+      doc,
+    } = req;
 
     const deleted = await doc.remove();
     res.json({
