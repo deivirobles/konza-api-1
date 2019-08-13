@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
-const {
-  Schema,
-} = mongoose;
+const { Schema } = mongoose;
 
 const fields = {
   title: {
@@ -27,12 +25,15 @@ const references = {
   },
 };
 
-const project = new Schema({
-  ...fields,
-  ...references,
-}, {
-  timestamps: true,
-});
+const project = new Schema(
+  {
+    ...fields,
+    ...references,
+  },
+  {
+    timestamps: true,
+  },
+);
 
 module.exports = {
   Model: mongoose.model('project', project),
