@@ -1,15 +1,21 @@
 const HTTP_STATUS_CODE = require('http-status-codes');
 
-const { Model, fields, references } = require('./model');
+const {
+  Model, fields, references, virtuals,
+} = require('./model');
 const { paginationParseParams } = require('./../../../utils');
 const { sortParseParams, sortCompactToStr } = require('./../../../utils');
 const { filterByNested } = require('./../../../utils');
+const { populateToObject } = require('./../../../utils');
 
 /*
  * Obtenemos un Array con los nombres de las llaves
  * de las referencias
  */
-const referencesNames = Object.getOwnPropertyNames(references);
+const referencesNames = [
+  ...Object.getOwnPropertyNames(references),
+  ...Object.getOwnPropertyNames(virtuals),
+];
 
 exports.id = async (req, res, next, id) => {
   try {
@@ -69,13 +75,14 @@ exports.all = async (req, res, next) => {
    * llave padre
    */
   const { filters, populate } = filterByNested(params, referencesNames);
+  const populateObject = populateToObject(populate.split(' '), virtuals);
 
   try {
     const all = Model.find(filters)
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate(populate)
+      .populate(populateObject)
       .exec();
     const count = Model.countDocuments();
 

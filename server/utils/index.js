@@ -1,4 +1,4 @@
-const { pagination, sort } = require('./../config');
+const { pagination, sort, populate } = require('./../config');
 
 const paginationParseParams = ({
   limit = pagination.limit,
@@ -46,9 +46,32 @@ const filterByNested = (params, referencesNames) => {
   };
 };
 
+// populateNames = ['userId', 'tasks']
+// virtuals = { tasks: ..... }
+// virtualNames = ['tasks']
+
+const populateToObject = (populateNames, virtuals = {}) => {
+  const virtualNames = Object.getOwnPropertyNames(virtuals);
+  const { virtuals: virtualConfig } = populate;
+  return populateNames.map((item) => {
+    let options = {};
+    if (virtualNames.includes(item)) {
+      options = {
+        limit: virtualConfig.limit,
+        sort: sortCompactToStr(virtualConfig.sort, virtualConfig.direction),
+      };
+    }
+    return {
+      path: item,
+      options,
+    };
+  });
+};
+
 module.exports = {
   paginationParseParams,
   sortParseParams,
   sortCompactToStr,
   filterByNested,
+  populateToObject,
 };

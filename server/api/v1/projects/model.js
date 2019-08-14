@@ -25,6 +25,12 @@ const references = {
   },
 };
 
+/*
+ * En la configuracion del Schema indicamos que
+ * cada vez que vayamos a dar una respuesta en
+ * formato JSON incluya los campos virtuales
+ */
+
 const project = new Schema(
   {
     ...fields,
@@ -32,11 +38,36 @@ const project = new Schema(
   },
   {
     timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
   },
 );
+
+/*
+ * Creamos un objeto virtuals que va a tener
+ * todos los campos virtuales donde se referencia
+ * el modelo, la llave local y la llave foranea
+ * que se utilizara para hacer populate de este campo
+ */
+
+const virtuals = {
+  tasks: {
+    ref: 'task',
+    localField: '_id',
+    foreignField: 'projectId',
+  },
+};
+
+/*
+ * Añadimos este campo con la referencia tasks
+ */
+
+project.virtual('tasks', virtuals.tasks);
 
 module.exports = {
   Model: mongoose.model('project', project),
   fields,
   references,
+  virtuals,
 };
