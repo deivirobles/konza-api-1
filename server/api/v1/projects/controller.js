@@ -6,6 +6,7 @@ const {
 const { paginationParseParams } = require('./../../../utils');
 const { sortParseParams, sortCompactToStr } = require('./../../../utils');
 const { filterByNested } = require('./../../../utils');
+const { populateToObject } = require('./../../../utils');
 
 /*
  * Obtenemos un Array con los nombres de las llaves
@@ -74,13 +75,14 @@ exports.all = async (req, res, next) => {
    * llave padre
    */
   const { filters, populate } = filterByNested(params, referencesNames);
+  const populateObject = populateToObject(populate.split(' '), virtuals);
 
   try {
     const all = Model.find(filters)
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate(populate)
+      .populate(populateObject)
       .exec();
     const count = Model.countDocuments();
 
