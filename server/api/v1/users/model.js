@@ -21,6 +21,11 @@ const fields = {
     trim: true,
     unique: true,
   },
+  password: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   profilePhoto: {
     type: String,
     trim: true,
@@ -31,6 +36,9 @@ const fields = {
 const user = new Schema(fields, {
   timestamps: true,
   toJSON: {
+    virtuals: true,
+  },
+  toObject: {
     virtuals: true,
   },
 });
@@ -51,6 +59,17 @@ user
       this.lastname = lastname;
     },
   );
+
+const blackListFields = ['password'];
+
+// prettier-ignore
+user.methods.toJSON = function toJSON() {
+  const document = this.toObject();
+  blackListFields.forEach((field) => {
+    delete document[field];
+  });
+  return document;
+};
 
 module.exports = {
   Model: mongoose.model('user', user),
