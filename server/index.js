@@ -2,13 +2,22 @@ const express = require('express');
 const requestId = require('express-request-id')();
 const bodyParser = require('body-parser');
 const HTTP_STATUS_CODE = require('http-status-codes');
+const cors = require('cors');
 
+const config = require('./config');
 const logger = require('./config/logger');
 const api = require('./api/v1');
 
 const app = express();
 
 // Setup Middleware
+app.use(
+  cors({
+    origin: config.server.origin,
+    methods: ['HEAD', 'OPTIONS', 'GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Accept', 'Content-Type', 'Authorization'],
+  }),
+);
 app.use(requestId);
 app.use(logger.requests);
 
