@@ -1,8 +1,5 @@
 const HTTP_STATUS_CODES = require('http-status-codes');
 const { sign, verify } = require('jsonwebtoken');
-// const { promisify } = require('util');
-
-// const verifyAsync = promisify(verify);
 
 const config = require('./../../config');
 
@@ -15,7 +12,7 @@ const signToken = (payload, expiresIn = expires) => sign(payload, secret, {
 
 const auth = (req, res, next) => {
   const { headers = {} } = req;
-  const { authorization = {} } = headers;
+  const { authorization = '' } = headers;
 
   if (authorization) {
     const [, token] = authorization.split(' ');
@@ -40,7 +37,37 @@ const auth = (req, res, next) => {
   }
 };
 
+const me = (req, res, next) => {
+  const { decoded = {}, doc = {} } = req;
+
+  if (decoded.id === doc.id) {
+    next();
+  } else {
+    next({
+      success: false,
+      message: 'Unauthorized',
+      statusCode: HTTP_STATUS_CODES.UNAUTHORIZED,
+    });
+  }
+};
+
+const owner = (req, res, next) => {
+  const { decoded = {}, doc = {} } = req;
+
+  if (decoded.id === doc.userId) {
+    next();
+  } else {
+    next({
+      success: false,
+      message: 'Unauthorized',
+      statusCode: HTTP_STATUS_CODES.UNAUTHORIZED,
+    });
+  }
+};
+
 module.exports = {
   signToken,
   auth,
+  me,
+  owner,
 };
