@@ -4,6 +4,8 @@ const { Model, fields } = require('./model');
 const { paginationParseParams } = require('./../../../utils');
 const { sortParseParams, sortCompactToStr } = require('./../../../utils');
 
+const { signToken } = require('./../auth');
+
 exports.id = async (req, res, next, id) => {
   try {
     const doc = await Model.findById(id).exec();
@@ -21,18 +23,58 @@ exports.id = async (req, res, next, id) => {
   }
 };
 
-exports.create = async (req, res, next) => {
+exports.signup = async (req, res, next) => {
   const { body = {} } = req;
 
   try {
     const doc = await Model.create(body);
+    // Generar token
+    const { id } = doc;
+    const token = signToken({ id });
 
     res.status(HTTP_STATUS_CODE.CREATED);
     res.json({
       data: doc,
       success: true,
       statusCode: HTTP_STATUS_CODE.CREATED,
+      meta: {
+        token,
+      },
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.signin = async (req, res, next) => {
+  const { body = {} } = req;
+  const { email = '', password = '' } = body;
+  try {
+    // Obtener el usuario basado en el email
+    const user = await Model.findOne({ email });
+    const verified = await user.verifyPassword(password);
+    // Verificar si existe
+    // Comparar la contraseña
+    if (user && verified) {
+      // Generar token
+      const { id } = user;
+      const token = signToken({ id });
+      // Devolver el usuario
+      res.json({
+        data: user,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+        meta: {
+          token,
+        },
+      });
+    } else {
+      next({
+        success: false,
+        statusCode: HTTP_STATUS_CODE.UNAUTHORIZED,
+        message: 'Invalid Email or Password',
+      });
+    }
   } catch (err) {
     next(err);
   }
