@@ -19,7 +19,8 @@
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^22.15.1",
     "jest": "^24.9.0",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.1",
+    "supertest": "^4.0.2"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
