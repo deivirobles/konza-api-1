@@ -1,11 +1,25 @@
 const request = require('supertest');
 
-const server = require('./simple-server');
+const server = require('./../server');
+const config = require('./../server/config');
+const database = require('./../server/database');
+
+let agent;
+
+beforeAll(() => {
+  const url = `${config.database.url}-test`;
+  database.connect({ url }, {});
+
+  agent = request(server);
+});
+
+afterAll(() => {
+  database.disconnect();
+});
 
 describe('Users', () => {
-  test('GET List of Users', async () => {
-    const res = await request(server).get('/api/users');
-    const { body } = res;
-    expect(body.success).toBeTruthy();
+  test('Cannot GET List of Users if the user is not authenticated', async () => {
+    const res = await agent.get('/api/users');
+    expect(res.status).toBe(401);
   });
 });
